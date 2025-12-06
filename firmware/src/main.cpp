@@ -29,6 +29,9 @@ bool oldDeviceConnected = false;
 uint8_t currentSpeed = 0;      // 0-100%
 uint8_t currentDirection = 1;  // 0=tył, 1=przód
 
+// ===== Forward Declarations =====
+void setMotorSpeed(uint8_t speedPercent, uint8_t direction);
+
 // ===== BLE Callbacks =====
 class MyServerCallbacks: public BLEServerCallbacks {
     void onConnect(BLEServer* pServer) {
