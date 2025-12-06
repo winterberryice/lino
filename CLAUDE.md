@@ -70,6 +70,25 @@ Przykłady:
 - Kontrola nad UI
 - Rozszerzalność (multi-loko, statystyki)
 
+**BLE Security - Current vs Future:**
+
+*MVP (obecne):* Bez parowania (open characteristics)
+- ✅ Szybkie połączenie (1-2s)
+- ✅ Prosty UX
+- ❌ Każdy w zasięgu może przejąć kontrolę
+- ❌ Ryzyko przypadkowego połączenia
+
+*Dla produkcji/wystaw:* Dodać pairing/bonding
+- Wymaga zmian w firmware (ESP_LE_AUTH_REQ_SC_BOND)
+- Wymaga zmian w apce (createBond())
+- Opcja 1: Static PIN (np. "1234")
+- Opcja 2: Dynamic PIN wyświetlany na serial
+- Opcja 3: OLED + dynamic PIN (najlepsze)
+
+**Rekomendacja:** MVP OK dla testów domowych. Dodać security przed użyciem publicznym/wystawami.
+
+**Scenariusz zagrożenia:** Wystawa modelarska → ktoś skanuje BLE → widzi "F7_Loko_XX" → łączy się → wysyła [100, 0] → lokomotywa jedzie full reverse → crash 💥
+
 ## Features MVP
 
 ### Firmware
@@ -79,17 +98,27 @@ Przykłady:
 - [x] Mapowanie 0-100% → 30-255 PWM
 
 ### Android
-- [ ] Skanowanie i lista urządzeń BLE
-- [ ] Połączenie z wybraną lokomotywą
-- [ ] Slider prędkości (0-100%)
-- [ ] Switch kierunku (Przód/Tył)
-- [ ] Przycisk STOP awaryjny
-- [ ] Status połączenia
+- [x] Skanowanie i lista urządzeń BLE
+- [x] Połączenie z wybraną lokomotywą
+- [x] Slider prędkości (0-100%)
+- [x] Switch kierunku (Przód/Tył)
+- [x] Przycisk STOP awaryjny
+- [x] Status połączenia
+- [x] Wykrywanie czy urządzenie ma service FFE0/FFE1
+- [x] Runtime permissions (Android 12+)
+- [x] Navigation (Scanner → Controller)
 
 ## Roadmap
 
-**Faza 2:** Monitoring baterii (GPIO34 + dzielnik), wyświetlanie w apce  
-**Faza 3:** Multi-locomotive control, synchronizacja prędkości  
+**Faza 1.5:** BLE Security (przed użyciem publicznym)
+- [ ] Firmware: Włączyć bonding/pairing na ESP32
+- [ ] Android: Obsługa createBond() i pairing UI
+- [ ] Opcjonalnie: OLED display do wyświetlania PIN
+
+**Faza 2:** Monitoring baterii (GPIO34 + dzielnik), wyświetlanie w apce
+
+**Faza 3:** Multi-locomotive control, synchronizacja prędkości
+
 **Faza 4:** LED headlight/taillight, dźwięki (DFPlayer Mini)
 
 ## Testowanie bez aplikacji
@@ -116,4 +145,4 @@ f7-locomotive/
 
 ---
 
-*Last update: 2024-12-06*
+*Last update: 2025-12-06*
