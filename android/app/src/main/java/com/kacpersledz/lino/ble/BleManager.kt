@@ -62,9 +62,13 @@ class BleManager private constructor(private val context: Context) {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            val deviceName = device.name ?: "Unknown"
+            val deviceName = device.name ?: return  // Brak nazwy = skip
 
-            // Filtrujemy po UUID FFE0 (tylko F7 lokomotywy)
+            // Double-check: UUID FFE0 (hardware filter) + nazwa F7_Loko_ (software filter)
+            if (!deviceName.startsWith(DEVICE_NAME_PREFIX)) {
+                return  // Nie jest F7 lokomotywą
+            }
+
             val locomotiveDevice = LocomotiveDevice(
                 name = deviceName,
                 address = device.address,
@@ -124,7 +128,9 @@ class BleManager private constructor(private val context: Context) {
 
         _discoveredDevices.value = emptyList()
 
-        // Filtrowanie po UUID serwisu FFE0 (tylko F7 lokomotywy)
+        // Dwupoziomowe filtrowanie:
+        // 1. Hardware: UUID FFE0 (szybki, systemowy)
+        // 2. Software: nazwa "F7_Loko_*" (bezpieczny, w callback)
         val scanFilter = ScanFilter.Builder()
             .setServiceUuid(ParcelUuid(SERVICE_UUID))
             .build()
