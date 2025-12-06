@@ -46,6 +46,7 @@ fun ControllerScreen(
 ) {
     val connectionState by viewModel.connectionState.collectAsState()
     val connectedDevice by viewModel.connectedDevice.collectAsState()
+    val isControlReady by viewModel.isControlReady.collectAsState()
     val speed by viewModel.speed.collectAsState()
     val isForward by viewModel.isForward.collectAsState()
 
@@ -62,16 +63,18 @@ fun ControllerScreen(
                     Column {
                         Text(connectedDevice?.name ?: "Locomotive")
                         Text(
-                            text = when (connectionState) {
-                                ConnectionState.CONNECTED -> "Connected"
-                                ConnectionState.CONNECTING -> "Connecting..."
-                                ConnectionState.DISCONNECTING -> "Disconnecting..."
-                                ConnectionState.DISCONNECTED -> "Disconnected"
+                            text = when {
+                                connectionState == ConnectionState.CONNECTED && isControlReady -> "Ready to Control"
+                                connectionState == ConnectionState.CONNECTED && !isControlReady -> "Connected (No Control Service)"
+                                connectionState == ConnectionState.CONNECTING -> "Connecting..."
+                                connectionState == ConnectionState.DISCONNECTING -> "Disconnecting..."
+                                else -> "Disconnected"
                             },
                             style = MaterialTheme.typography.bodySmall,
-                            color = when (connectionState) {
-                                ConnectionState.CONNECTED -> Color(0xFF4CAF50)
-                                ConnectionState.DISCONNECTED -> Color(0xFFF44336)
+                            color = when {
+                                connectionState == ConnectionState.CONNECTED && isControlReady -> Color(0xFF4CAF50)
+                                connectionState == ConnectionState.CONNECTED && !isControlReady -> Color(0xFFFF9800)
+                                connectionState == ConnectionState.DISCONNECTED -> Color(0xFFF44336)
                                 else -> MaterialTheme.colorScheme.onPrimaryContainer
                             }
                         )
@@ -91,6 +94,36 @@ fun ControllerScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // Warning if device doesn't have control service
+            if (connectionState == ConnectionState.CONNECTED && !isControlReady) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFFF9800).copy(alpha = 0.15f)
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = "⚠️ Incompatible Device",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFFFF6F00)
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(
+                            text = "This device doesn't have the locomotive control service (FFE0/FFE1). Controls won't work.",
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.height(16.dp))
+            }
+
             // Speed display card
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -147,6 +180,7 @@ fun ControllerScreen(
                         value = speed.toFloat(),
                         onValueChange = { viewModel.setSpeed(it.toInt()) },
                         valueRange = 0f..100f,
+                        enabled = isControlReady,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Row(
@@ -189,7 +223,8 @@ fun ControllerScreen(
                     }
                     Switch(
                         checked = isForward,
-                        onCheckedChange = { viewModel.setDirection(it) }
+                        onCheckedChange = { viewModel.setDirection(it) },
+                        enabled = isControlReady
                     )
                 }
             }
@@ -204,6 +239,7 @@ fun ControllerScreen(
                 // Emergency stop button
                 Button(
                     onClick = { viewModel.stop() },
+                    enabled = isControlReady,
                     modifier = Modifier
                         .weight(1f)
                         .height(80.dp),

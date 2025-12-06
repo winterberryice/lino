@@ -52,6 +52,9 @@ class BleManager private constructor(private val context: Context) {
     private val _connectedDevice = MutableStateFlow<LocomotiveDevice?>(null)
     val connectedDevice: StateFlow<LocomotiveDevice?> = _connectedDevice.asStateFlow()
 
+    private val _isControlReady = MutableStateFlow(false)
+    val isControlReady: StateFlow<Boolean> = _isControlReady.asStateFlow()
+
     private val scanCallback = object : ScanCallback() {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
@@ -93,6 +96,7 @@ class BleManager private constructor(private val context: Context) {
                 BluetoothProfile.STATE_DISCONNECTED -> {
                     _connectionState.value = ConnectionState.DISCONNECTED
                     _connectedDevice.value = null
+                    _isControlReady.value = false
                     cleanup()
                 }
             }
@@ -102,6 +106,11 @@ class BleManager private constructor(private val context: Context) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 val service = gatt.getService(SERVICE_UUID)
                 controlCharacteristic = service?.getCharacteristic(CHARACTERISTIC_UUID)
+
+                // Update control ready state
+                _isControlReady.value = controlCharacteristic != null
+            } else {
+                _isControlReady.value = false
             }
         }
     }

@@ -32,6 +32,13 @@ class ControllerViewModel(application: Application) : AndroidViewModel(applicati
             initialValue = null
         )
 
+    val isControlReady: StateFlow<Boolean> = bleManager.isControlReady
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
+
     private val _speed = MutableStateFlow(0)
     val speed: StateFlow<Int> = _speed.asStateFlow()
 
