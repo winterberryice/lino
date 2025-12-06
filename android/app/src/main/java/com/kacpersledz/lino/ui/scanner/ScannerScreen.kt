@@ -1,5 +1,7 @@
 package com.kacpersledz.lino.ui.scanner
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,11 +33,15 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.MultiplePermissionsState
+import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.kacpersledz.lino.ble.LocomotiveDevice
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun ScannerScreen(
     onDeviceSelected: (String) -> Unit,
@@ -44,8 +50,22 @@ fun ScannerScreen(
     val discoveredDevices by viewModel.discoveredDevices.collectAsState()
     val isScanning by viewModel.isScanning.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.startScanning()
+    // Request BLE permissions
+    val permissionsState = rememberMultiplePermissionsState(
+        permissions = buildList {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                add(Manifest.permission.BLUETOOTH_SCAN)
+                add(Manifest.permission.BLUETOOTH_CONNECT)
+            } else {
+                add(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    )
+
+    LaunchedEffect(permissionsState.allPermissionsGranted) {
+        if (permissionsState.allPermissionsGranted) {
+            viewModel.startScanning()
+        }
     }
 
     Scaffold(
@@ -59,6 +79,17 @@ fun ScannerScreen(
             )
         }
     ) { paddingValues ->
+        // Show permission request UI if permissions not granted
+        if (!permissionsState.allPermissionsGranted) {
+            PermissionRequestContent(
+                permissionsState = permissionsState,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
+            return@Scaffold
+        }
+
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -186,6 +217,43 @@ fun LocomotiveDeviceCard(
 
             Button(onClick = onConnect) {
                 Text("Connect")
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalPermissionsApi::class)
+@Composable
+fun PermissionRequestContent(
+    permissionsState: MultiplePermissionsState,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            modifier = Modifier.padding(32.dp)
+        ) {
+            Text(
+                text = "Bluetooth Permissions Required",
+                style = MaterialTheme.typography.headlineSmall,
+                fontWeight = FontWeight.Bold,
+                textAlign = TextAlign.Center
+            )
+            Text(
+                text = "This app needs Bluetooth permissions to scan and connect to F7 locomotives.",
+                style = MaterialTheme.typography.bodyMedium,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Button(
+                onClick = { permissionsState.launchMultiplePermissionRequest() },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Grant Permissions")
             }
         }
     }
