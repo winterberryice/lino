@@ -71,7 +71,7 @@ fun ScannerScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("F7 Locomotives") },
+                title = { Text("BLE Devices (All)") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer,
                     titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
@@ -145,7 +145,7 @@ fun ScannerScreen(
                 ) {
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         Text(
-                            text = if (isScanning) "Searching for locomotives..." else "No locomotives found",
+                            text = if (isScanning) "Searching for BLE devices..." else "No devices found",
                             style = MaterialTheme.typography.bodyLarge,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -244,7 +244,7 @@ fun PermissionRequestContent(
                 textAlign = TextAlign.Center
             )
             Text(
-                text = "This app needs Bluetooth permissions to scan and connect to F7 locomotives.",
+                text = "This app needs Bluetooth permissions to scan and connect to BLE devices.",
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurfaceVariant

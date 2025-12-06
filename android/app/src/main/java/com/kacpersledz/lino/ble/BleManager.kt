@@ -56,26 +56,25 @@ class BleManager private constructor(private val context: Context) {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            val deviceName = device.name ?: return
+            val deviceName = device.name ?: "Unknown Device"
 
-            if (deviceName.startsWith(DEVICE_NAME_PREFIX)) {
-                val locomotiveDevice = LocomotiveDevice(
-                    name = deviceName,
-                    address = device.address,
-                    rssi = result.rssi
-                )
+            // Show ALL devices for testing (filter removed)
+            val locomotiveDevice = LocomotiveDevice(
+                name = deviceName,
+                address = device.address,
+                rssi = result.rssi
+            )
 
-                val currentDevices = _discoveredDevices.value.toMutableList()
-                val existingIndex = currentDevices.indexOfFirst { it.address == locomotiveDevice.address }
+            val currentDevices = _discoveredDevices.value.toMutableList()
+            val existingIndex = currentDevices.indexOfFirst { it.address == locomotiveDevice.address }
 
-                if (existingIndex != -1) {
-                    currentDevices[existingIndex] = locomotiveDevice
-                } else {
-                    currentDevices.add(locomotiveDevice)
-                }
-
-                _discoveredDevices.value = currentDevices.sortedByDescending { it.rssi }
+            if (existingIndex != -1) {
+                currentDevices[existingIndex] = locomotiveDevice
+            } else {
+                currentDevices.add(locomotiveDevice)
             }
+
+            _discoveredDevices.value = currentDevices.sortedByDescending { it.rssi }
         }
 
         override fun onScanFailed(errorCode: Int) {
