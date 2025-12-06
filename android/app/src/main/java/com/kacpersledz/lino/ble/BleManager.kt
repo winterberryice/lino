@@ -9,8 +9,11 @@ import android.bluetooth.BluetoothGattCharacteristic
 import android.bluetooth.BluetoothManager
 import android.bluetooth.BluetoothProfile
 import android.bluetooth.le.ScanCallback
+import android.bluetooth.le.ScanFilter
 import android.bluetooth.le.ScanResult
+import android.bluetooth.le.ScanSettings
 import android.content.Context
+import android.os.ParcelUuid
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -59,9 +62,9 @@ class BleManager private constructor(private val context: Context) {
         @SuppressLint("MissingPermission")
         override fun onScanResult(callbackType: Int, result: ScanResult) {
             val device = result.device
-            val deviceName = device.name ?: "Unknown Device"
+            val deviceName = device.name ?: "Unknown"
 
-            // Show ALL devices for testing (filter removed)
+            // Filtrujemy po UUID FFE0 (tylko F7 lokomotywy)
             val locomotiveDevice = LocomotiveDevice(
                 name = deviceName,
                 address = device.address,
@@ -120,7 +123,17 @@ class BleManager private constructor(private val context: Context) {
         if (bluetoothAdapter?.isEnabled != true) return
 
         _discoveredDevices.value = emptyList()
-        bleScanner?.startScan(scanCallback)
+
+        // Filtrowanie po UUID serwisu FFE0 (tylko F7 lokomotywy)
+        val scanFilter = ScanFilter.Builder()
+            .setServiceUuid(ParcelUuid(SERVICE_UUID))
+            .build()
+
+        val scanSettings = ScanSettings.Builder()
+            .setScanMode(ScanSettings.SCAN_MODE_LOW_LATENCY)
+            .build()
+
+        bleScanner?.startScan(listOf(scanFilter), scanSettings, scanCallback)
         _isScanning.value = true
     }
 
