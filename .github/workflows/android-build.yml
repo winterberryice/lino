@@ -2,18 +2,10 @@ name: Android Build
 
 on:
   push:
-    branches:
-      - main
-      - master
-      - develop
-      - 'claude/**'
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
   pull_request:
-    branches:
-      - main
-      - master
     paths:
       - 'android/**'
       - '.github/workflows/android-build.yml'
