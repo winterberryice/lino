@@ -12,7 +12,7 @@ import kotlinx.coroutines.launch
 
 class ScannerViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val bleManager = BleManager(application)
+    private val bleManager = BleManager.getInstance(application)
 
     val discoveredDevices: StateFlow<List<LocomotiveDevice>> = bleManager.discoveredDevices
         .stateIn(

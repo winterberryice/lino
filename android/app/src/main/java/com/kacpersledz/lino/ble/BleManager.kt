@@ -16,12 +16,21 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import java.util.UUID
 
-class BleManager(private val context: Context) {
+class BleManager private constructor(private val context: Context) {
 
     companion object {
         private val SERVICE_UUID = UUID.fromString("0000FFE0-0000-1000-8000-00805F9B34FB")
         private val CHARACTERISTIC_UUID = UUID.fromString("0000FFE1-0000-1000-8000-00805F9B34FB")
         private const val DEVICE_NAME_PREFIX = "F7_Loko_"
+
+        @Volatile
+        private var instance: BleManager? = null
+
+        fun getInstance(context: Context): BleManager {
+            return instance ?: synchronized(this) {
+                instance ?: BleManager(context.applicationContext).also { instance = it }
+            }
+        }
     }
 
     private val bluetoothManager = context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
@@ -137,8 +146,18 @@ class BleManager(private val context: Context) {
 
         if (_connectionState.value != ConnectionState.CONNECTED) return false
 
-        characteristic.value = command.toByteArray()
-        return gatt.writeCharacteristic(characteristic)
+        return if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+            gatt.writeCharacteristic(
+                characteristic,
+                command.toByteArray(),
+                BluetoothGattCharacteristic.WRITE_TYPE_DEFAULT
+            ) == BluetoothGatt.GATT_SUCCESS
+        } else {
+            @Suppress("DEPRECATION")
+            characteristic.value = command.toByteArray()
+            @Suppress("DEPRECATION")
+            gatt.writeCharacteristic(characteristic)
+        }
     }
 
     fun sendStop() {

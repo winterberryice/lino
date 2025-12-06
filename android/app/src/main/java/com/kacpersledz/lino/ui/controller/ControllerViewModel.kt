@@ -16,7 +16,7 @@ import kotlinx.coroutines.launch
 
 class ControllerViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val bleManager = BleManager(application)
+    private val bleManager = BleManager.getInstance(application)
 
     val connectionState: StateFlow<ConnectionState> = bleManager.connectionState
         .stateIn(
@@ -78,6 +78,7 @@ class ControllerViewModel(application: Application) : AndroidViewModel(applicati
 
     override fun onCleared() {
         super.onCleared()
-        bleManager.release()
+        // Don't release the singleton, just stop sending commands
+        // Connection will be maintained or handled by user action
     }
 }
