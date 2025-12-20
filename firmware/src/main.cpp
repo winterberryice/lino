@@ -132,18 +132,18 @@ void setMotorSpeed(uint8_t speedPercent, uint8_t direction) {
         ledcWrite(PWM_CHANNEL_2, 0);
         Serial.println("   ⏹️  STOP (oba piny LOW)");
     } else if (direction == 1) {
-        // PRZÓD: IN1=PWM, IN2=LOW
-        ledcWrite(PWM_CHANNEL_1, pwmValue);
-        ledcWrite(PWM_CHANNEL_2, 0);
-        Serial.print("   ▶️  GPIO0(IN1)=");
-        Serial.print(pwmValue);
-        Serial.println(", GPIO1(IN2)=0");
-    } else {
-        // TYŁ: IN1=LOW, IN2=PWM
+        // PRZÓD: IN1=LOW, IN2=PWM (odwrócone dla korekcji fizycznego montażu)
         ledcWrite(PWM_CHANNEL_1, 0);
         ledcWrite(PWM_CHANNEL_2, pwmValue);
-        Serial.print("   ◀️  GPIO0(IN1)=0, GPIO1(IN2)=");
+        Serial.print("   ▶️  GPIO0(IN1)=0, GPIO1(IN2)=");
         Serial.println(pwmValue);
+    } else {
+        // TYŁ: IN1=PWM, IN2=LOW (odwrócone dla korekcji fizycznego montażu)
+        ledcWrite(PWM_CHANNEL_1, pwmValue);
+        ledcWrite(PWM_CHANNEL_2, 0);
+        Serial.print("   ◀️  GPIO0(IN1)=");
+        Serial.print(pwmValue);
+        Serial.println(", GPIO1(IN2)=0");
     }
 }
 
