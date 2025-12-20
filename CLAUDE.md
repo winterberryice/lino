@@ -6,16 +6,18 @@ Sterowanie lokomotywą F7 Dragon Railway (skala S 1:64) przez BLE ze smartfona A
 
 | Komponent | Spec |
 |-----------|------|
-| Mikrokontroler | ESP32 CP2102 38-pin |
+| Mikrokontroler | ESP32-C3 Super Mini (HW-476AB) |
 | Sterownik silników | DRV8833 |
 | Silniki | 2× N20 3V 1000RPM |
 | Zasilanie | 4× AA NiMH → buck-boost → 3.3V |
 
 ### GPIO Mapping
 ```
-GPIO25 → DRV8833 AIN1+BIN1 (oba silniki IN1)
-GPIO26 → DRV8833 AIN2+BIN2 (oba silniki IN2)
+GPIO0 → DRV8833 AIN1+BIN1 (oba silniki IN1)
+GPIO1 → DRV8833 AIN2+BIN2 (oba silniki IN2)
 ```
+
+**Uwaga o GPIO0:** Ten pin służy do boot mode (LOW = download mode), ale po uruchomieniu można go używać normalnie jako GPIO.
 
 **Uwaga:** Oba silniki sterowane synchronicznie (lokomotywa nie skręca).
 
@@ -26,9 +28,10 @@ GPIO26 → DRV8833 AIN2+BIN2 (oba silniki IN2)
 
 ## Software Stack
 
-**Firmware (ESP32):**
+**Firmware (ESP32-C3):**
 - PlatformIO + Arduino framework
 - C++, natywne BLE (`BLEDevice.h`)
+- Board: `esp32-c3-devkitm-1`
 
 **Aplikacja Android:**
 - Kotlin + Jetpack Compose
@@ -139,10 +142,10 @@ Użyj **nRF Connect** (Android/iOS):
 f7-locomotive/
 ├── README.md
 ├── CLAUDE.md       (ten plik)
-├── firmware/       (ESP32 PlatformIO)
+├── firmware/       (ESP32-C3 PlatformIO)
 └── android/        (Kotlin app)
 ```
 
 ---
 
-*Last update: 2025-12-06*
+*Last update: 2025-12-20*

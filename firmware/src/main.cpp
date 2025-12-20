@@ -9,8 +9,8 @@
 #define CHARACTERISTIC_UUID "0000FFE1-0000-1000-8000-00805F9B34FB"
 
 // ===== Motor Configuration =====
-#define MOTOR_IN1_PIN 25  // DRV8833 IN1 (both motors)
-#define MOTOR_IN2_PIN 26  // DRV8833 IN2 (both motors)
+#define MOTOR_IN1_PIN 0  // DRV8833 IN1 (both motors) - ESP32-C3
+#define MOTOR_IN2_PIN 1  // DRV8833 IN2 (both motors) - ESP32-C3
 
 #define PWM_FREQ 1000     // 1kHz
 #define PWM_RESOLUTION 8  // 8-bit (0-255)
@@ -135,14 +135,14 @@ void setMotorSpeed(uint8_t speedPercent, uint8_t direction) {
         // PRZÓD: IN1=PWM, IN2=LOW
         ledcWrite(PWM_CHANNEL_1, pwmValue);
         ledcWrite(PWM_CHANNEL_2, 0);
-        Serial.print("   ▶️  GPIO25(IN1)=");
+        Serial.print("   ▶️  GPIO0(IN1)=");
         Serial.print(pwmValue);
-        Serial.println(", GPIO26(IN2)=0");
+        Serial.println(", GPIO1(IN2)=0");
     } else {
         // TYŁ: IN1=LOW, IN2=PWM
         ledcWrite(PWM_CHANNEL_1, 0);
         ledcWrite(PWM_CHANNEL_2, pwmValue);
-        Serial.print("   ◀️  GPIO25(IN1)=0, GPIO26(IN2)=");
+        Serial.print("   ◀️  GPIO0(IN1)=0, GPIO1(IN2)=");
         Serial.println(pwmValue);
     }
 }
@@ -153,7 +153,7 @@ void setup() {
 
     Serial.println("\n\n");
     Serial.println("╔════════════════════════════════════════╗");
-    Serial.println("║   F7 LOCOMOTIVE CONTROLLER - ESP32    ║");
+    Serial.println("║  F7 LOCOMOTIVE CONTROLLER - ESP32-C3  ║");
     Serial.println("║        Dragon Railway S 1:64          ║");
     Serial.println("╚════════════════════════════════════════╝");
     Serial.println();
@@ -165,9 +165,9 @@ void setup() {
     ledcAttachPin(MOTOR_IN1_PIN, PWM_CHANNEL_1);
     ledcAttachPin(MOTOR_IN2_PIN, PWM_CHANNEL_2);
 
-    Serial.print("   GPIO25 (IN1) → PWM Channel ");
+    Serial.print("   GPIO0 (IN1) → PWM Channel ");
     Serial.println(PWM_CHANNEL_1);
-    Serial.print("   GPIO26 (IN2) → PWM Channel ");
+    Serial.print("   GPIO1 (IN2) → PWM Channel ");
     Serial.println(PWM_CHANNEL_2);
     Serial.print("   PWM Freq: ");
     Serial.print(PWM_FREQ);
